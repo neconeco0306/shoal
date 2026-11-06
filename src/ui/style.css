@@ -27,3 +27,8 @@
 #touch-stick{position:fixed;width:96px;height:96px;transform:translate(-50%,-50%);border:1px solid #b9e1d877;border-radius:50%;background:#123b4055;pointer-events:none;}
 #touch-stick i{position:absolute;left:31px;top:31px;width:32px;height:32px;border:1px solid #c7dfd7bb;background:#c7dfd733;border-radius:50%;transform:translate(var(--stick-x,0px),var(--stick-y,0px));}
 @media(pointer:coarse){.touch-controls #touch-drag-hint,.touch-controls #touch-stick{pointer-events:none;}.controls{display:none!important;}}
+
+/* Prevent long-press callouts and double-tap selection on the game surface. */
+#app,#app *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+#app{touch-action:manipulation;}
+#app input,#app textarea,#app select,#app [contenteditable="true"],#app [contenteditable="true"] *,#app #online-status,#app #online-status *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;}

@@ -17,10 +17,12 @@ import { PredatorRenderer } from './predators/PredatorRenderer';
 import { Soundscape } from './audio/Soundscape';
 import { Tug, blueBuoy, redBuoy } from './game/Tug';
 import { Online } from './network/Online';
+import { installTouchGuards } from './ui/TouchGuard';
 import './ui/style.css';
 
 function start(): void {
   const app=document.querySelector<HTMLElement>('#app')!,params=new URLSearchParams(location.search),mobile=matchMedia('(pointer: coarse)').matches;
+  installTouchGuards(app);
   const requestedCount=Number(params.get('fish'));let selectedCount=mobile?500:1500;
   if(params.has('debug')&&Number.isInteger(requestedCount)&&requestedCount>=100&&requestedCount<=3000)selectedCount=requestedCount;
   config.school.count=selectedCount;
