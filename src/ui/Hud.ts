@@ -61,10 +61,10 @@ export class Hud {
       <div class="hint" id="hint">命令は、いらない。<span>近くで同じ向きに2秒泳ぐと、魚はほんのり金色に。</span></div>
       <footer class="bottom-bar">
         <section class="vitals" aria-label="プレイヤーの状態"><div class="eyebrow">ENERGY <span id="speed">4.0 BL/S</span></div><div class="energy-track"><div id="stamina-fill"></div></div><div class="vital-details"><span>深度 <b id="depth">22</b> m相当</span><span id="fps">計測中</span></div></section>
-        <section class="controls" aria-label="操作方法"><p><kbd>A</kbd><kbd>D</kbd> 左右 <i>／</i> マウスで向き <i>／</i> <kbd>W</kbd><kbd>S</kbd> 上下</p><p><kbd>Shift</kbd> / 左クリック 加速 <i>·</i> <kbd>Space</kbd><kbd>C</kbd> 上下 <i>·</i> <kbd>R</kbd> やり直し</p></section>
+        <section class="controls" aria-label="操作方法"><p><kbd>A</kbd><kbd>D</kbd> 左右 <i>／</i> <span id="mouse-mode">マウス操作 OFF · 海をクリックで切替</span> <i>／</i> <kbd>W</kbd><kbd>S</kbd> 上下</p><p><kbd>Shift</kbd> 加速 <i>·</i> <kbd>Space</kbd><kbd>C</kbd> 上下 <i>·</i> <kbd>R</kbd> やり直し</p></section>
         <section class="radar-panel" aria-label="周囲の地図"><div class="radar-title"><span>周囲 100体長</span><span>N ↑</span></div><canvas id="radar" width="320" height="320"></canvas><div class="radar-legend"><span>● 群れ</span><span class="gold">● あなた</span><span class="mint">◇ ブイ</span></div></section>
       </footer>
-      <div class="touch-controls"><div class="touch-depth" id="touch-depth">上下 ↕</div><div id="touch-pad" aria-label="ドラッグで向きを操作"><span>方向</span><i></i></div><button id="touch-boost">加速</button></div>
+      <div class="touch-controls"><div id="touch-drag-hint">海をドラッグして上下左右へ</div><div id="touch-stick" aria-hidden="true" hidden><i></i></div><button id="touch-boost">加速</button></div>
       <section id="result" class="result" hidden aria-live="polite"><p class="eyebrow">A LITTLE FISH. A SHARED DIRECTION.</p><h2>到達。</h2><p>あなたの向きが、群れの行き先になった。</p><div class="result-time" id="result-time"></div><button id="again-button">もう一度、海へ <kbd>R</kbd></button></section>
       <div id="pause-overlay" class="pause-overlay" hidden><p class="eyebrow">TAKE A BREATH</p><h2>ひと休み。</h2><button id="resume-button">泳ぎつづける <kbd>P</kbd></button></div>
       <section id="failure-overlay" class="result failure" hidden role="dialog" aria-label="ミッション失敗" aria-live="polite"><p class="eyebrow">THE OCEAN GOES ON</p><h2>海に、のまれた。</h2><p id="failure-reason"></p><div class="result-time" id="failure-detail"></div><button id="retry-button">もう一度、泳ぐ <kbd>R</kbd></button></section>

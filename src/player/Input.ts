@@ -9,7 +9,10 @@ export class Input {
   pointerBoost = false;
   touchX = 0;
   touchY = 0;
-  touchDepth = 0;
+  private touchId: number | null = null;
+  private touchOrigin = { x: 0, y: 0 };
+  onMouseSteering = (_active: boolean): void => {};
+  onTouch = (_state: { x: number; y: number; dx: number; dy: number } | null): void => {};
   private padCamera = false;
   onCamera = (): void => {};
   onReset = (): void => {};
@@ -28,20 +31,56 @@ export class Input {
     });
     window.addEventListener('keyup', (event) => this.keys.delete(event.code));
     window.addEventListener('blur', () => this.clear());
-    canvas.addEventListener('pointermove', (event) => {
-      if (event.pointerType !== 'mouse') return;
+    const mousePosition = (event: PointerEvent): void => {
       const rect = canvas.getBoundingClientRect();
       this.mouseX = clamp((event.clientX - rect.left) / rect.width * 2 - 1, -1, 1);
       this.mouseY = clamp((event.clientY - rect.top) / rect.height * 2 - 1, -1, 1);
-      this.mouseActive = true;
+    };
+    canvas.addEventListener('pointerdown', event => {
+      if (event.pointerType === 'mouse') {
+        if (event.button !== 0) return;
+        this.setMouseSteering(!this.mouseActive);
+        if (this.mouseActive) mousePosition(event);
+        return;
+      }
+      if (this.touchId !== null) return;
+      event.preventDefault();
+      this.setMouseSteering(false);
+      this.touchId = event.pointerId;
+      this.touchOrigin = { x: event.clientX, y: event.clientY };
+      this.touchX = this.touchY = 0;
+      canvas.setPointerCapture(event.pointerId);
+      this.onTouch({ ...this.touchOrigin, dx: 0, dy: 0 });
     });
-    canvas.addEventListener('pointerleave', () => { this.mouseActive = false; });
-    canvas.addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse' && e.button === 0) this.pointerBoost = true; });
-    window.addEventListener('pointerup', event => { if(event.pointerType === 'mouse')this.pointerBoost = false; });
-    window.addEventListener('pointercancel', event => { if(event.pointerType === 'mouse')this.clear(); });
+    canvas.addEventListener('pointermove', event => {
+      if (event.pointerType === 'mouse') {
+        if (this.mouseActive) mousePosition(event);
+        return;
+      }
+      if (event.pointerId !== this.touchId) return;
+      const dx = event.clientX - this.touchOrigin.x, dy = event.clientY - this.touchOrigin.y;
+      const drag = (v: number): number => Math.abs(v) <= 5 ? 0 : clamp((v - Math.sign(v) * 5) / 65, -1, 1);
+      this.touchX = drag(dx); this.touchY = -drag(dy);
+      this.onTouch({ ...this.touchOrigin, dx: this.touchX * 35, dy: -this.touchY * 35 });
+    });
+    canvas.addEventListener('pointerleave', event => {
+      if (event.pointerType === 'mouse') this.mouseX = this.mouseY = 0;
+    });
+    const endTouch = (event: PointerEvent): void => {
+      if (event.pointerId !== this.touchId) return;
+      this.touchId = null; this.touchX = this.touchY = 0; this.onTouch(null);
+    };
+    canvas.addEventListener('pointerup', endTouch);
+    canvas.addEventListener('pointercancel', endTouch);
+    canvas.addEventListener('lostpointercapture', endTouch);
+  }
+  setMouseSteering(active: boolean): void {
+    this.mouseActive = active; this.mouseX = this.mouseY = 0;
+    this.onMouseSteering(active);
   }
   clear(): void {
-    this.keys.clear(); this.mouseActive = false; this.pointerBoost = false; this.touchX = 0; this.touchY = 0; this.touchDepth = 0;
+    this.keys.clear(); this.setMouseSteering(false); this.pointerBoost = false;
+    this.touchId = null; this.touchX = this.touchY = 0; this.onTouch(null);
   }
   get axes(): { yaw: number; pitch: number; boost: boolean } {
     const pad = navigator.getGamepads?.().find(p => p?.connected);
@@ -52,7 +91,7 @@ export class Input {
     const deadzone = (v: number): number => Math.abs(v) < config.player.mouseDeadzone ? 0 : (v - Math.sign(v) * config.player.mouseDeadzone) / (1 - config.player.mouseDeadzone);
     return {
       yaw: keyboardYaw || axis(0) || this.touchX || (this.mouseActive ? deadzone(this.mouseX) : 0),
-      pitch: keyboardPitch || -axis(3) || this.touchDepth || this.touchY || (this.mouseActive ? -deadzone(this.mouseY) : 0),
+      pitch: keyboardPitch || -axis(3) || this.touchY || (this.mouseActive ? -deadzone(this.mouseY) : 0),
       boost: (pad?.buttons[7]?.value??0)>.3 || this.pointerBoost || this.keys.has('ShiftLeft') || this.keys.has('ShiftRight'),
     };
   }
